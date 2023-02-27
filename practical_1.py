@@ -47,7 +47,11 @@ def distinct_words(corpus):
     
     # ------------------
     # Write your implementation here.
-
+    for doc in corpus:
+        for word in doc:
+            if word not in corpus_words: corpus_words.append(word)
+    corpus_words = sorted(corpus_words)
+    num_corpus_words = len(corpus_words)
     # ------------------
 
     return corpus_words, num_corpus_words
@@ -109,7 +113,25 @@ def compute_co_occurrence_matrix(corpus, window_size=4):
 
     # ------------------
     # Write your implementation here.
-
+    for i, w in enumerate(words):
+        word2Ind[w] = i
+    
+    M = np.zeros((num_words, num_words))
+       
+    for doc in corpus:
+        context = set()
+        for i in range(min(len(doc), window_size+1)):
+            context.add(doc[i])
+        
+        for index, focus in enumerate(doc):
+            context.remove(focus)
+            for w in context:
+                M[word2Ind[focus]][word2Ind[w]] += 1
+            context.add(focus)
+            if index-window_size >= 0:
+                context.remove(doc[index-window_size])
+            if index+window_size+1 < len(doc):
+                context.add(doc[index+window_size+1])
     # ------------------
 
     return M, word2Ind
