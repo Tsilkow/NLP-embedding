@@ -213,6 +213,8 @@ def reduce_to_k_dim(M, k=2):
 
     # ------------------
     # Write your implementation here.
+    svd = TruncatedSVD(n_components=k, n_iter=n_iters)
+    M_reduced = svd.fit_transform(M)
     # ------------------
 
     print("Done.")
@@ -257,7 +259,7 @@ def plot_embeddings(M_reduced, word2Ind, words):
 
     # ------------------
     # Write your implementation here.
-
+    plt.scatter(M_reduced[:, 0], M_reduced[:, 1])
     # ------------------#
 
 # ---------------------
