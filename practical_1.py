@@ -12,6 +12,7 @@ from gensim.models import KeyedVectors
 from gensim.test.utils import datapath
 import random
 import nltk
+from collections import Counter
 
 nltk.download('reuters')
 nltk.download('pl196x')
@@ -119,19 +120,27 @@ def compute_co_occurrence_matrix(corpus, window_size=4):
     M = np.zeros((num_words, num_words))
        
     for doc in corpus:
-        context = set()
+        # print(doc)
+        context = Counter()
         for i in range(min(len(doc), window_size+1)):
-            context.add(doc[i])
+            context[doc[i]] += 1
         
         for index, focus in enumerate(doc):
-            context.remove(focus)
+            context[focus] -= 1
+            # print(f'{index}, {focus}: {context}')
             for w in context:
-                M[word2Ind[focus]][word2Ind[w]] += 1
-            context.add(focus)
+                if context[w] != 0:
+                    M[word2Ind[focus]][word2Ind[w]] += 1
+            context[focus] += 1
             if index-window_size >= 0:
-                context.remove(doc[index-window_size])
+                context[doc[index-window_size]] -= 1
             if index+window_size+1 < len(doc):
-                context.add(doc[index+window_size+1])
+                context[doc[index+window_size+1]] += 1
+
+    # All focuses count themselves twice if they are in their window.
+    # To counter that, we're halving all values on the diagonal of M.
+    for i in range(M.shape[0]):
+        M[i][i] /= 2
     # ------------------
 
     return M, word2Ind
@@ -260,6 +269,8 @@ def plot_embeddings(M_reduced, word2Ind, words):
     # ------------------
     # Write your implementation here.
     plt.scatter(M_reduced[:, 0], M_reduced[:, 1])
+    plt.show()
+    plt.savefig('plot_d.png')
     # ------------------#
 
 # ---------------------
